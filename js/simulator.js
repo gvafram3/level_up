@@ -184,27 +184,22 @@ function semFooter(totCr, totWP, semWA, cum) {
 
 // ── Cumulative calculation up to (year, sem) ───────────────────────────────
 // Walk order: Y1S1 → Y1S2 → Y1S3 → Y2S1 → Y2S2 → Y2S3 → ...
-// For S1/S2 courses that have a resit in S3 of the same year, the S3 score
-// replaces the original score in the cumulative sum.
+// The resit semester is ADDITIVE — the original F score stays in full,
+// and the resit adds its own credits + weighted scores on top.
+// e.g. Trail: 3cr × 25 = 75 stays. Resit: 3cr × 50 = 150 added on top.
+// CWA = (75 + 150 + all other WP) / (3 + 3 + all other cr)
 function getCumulativeUpTo(targetYear, targetSem) {
   let totCr = 0, totWP = 0;
 
   for (let y = 1; y <= 4; y++) {
-    // Build a resit-score lookup for this year: code → resit score
-    const resitMap = {};
-    (semData[y][3] || []).forEach(r => {
-      if (r.score !== '' && r.score !== null) resitMap[r.code] = +r.score;
-    });
-
     for (let s = 1; s <= 3; s++) {
-      // Stop after we've processed the target semester
       if (y === targetYear && s > targetSem) break;
       if (y > targetYear) break;
 
       const courses = semData[y][s] || [];
 
       if (s === 3) {
-        // Resit semester: only add courses that have a resit score entered
+        // Resit semester: each entered resit score adds its own cr + WP
         courses.forEach(c => {
           if (c.score !== '' && c.score !== null) {
             totCr += c.cr;
@@ -212,11 +207,10 @@ function getCumulativeUpTo(targetYear, targetSem) {
           }
         });
       } else {
-        // Regular semester: use resit score if available, else original score
+        // Regular semester: every course contributes its original score as-is
         courses.forEach(c => {
-          const effectiveScore = resitMap[c.code] !== undefined ? resitMap[c.code] : +c.score;
           totCr += c.cr;
-          totWP += effectiveScore * c.cr;
+          totWP += +c.score * c.cr;
         });
       }
     }
