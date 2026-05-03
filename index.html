@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level Up — KNUST CWA Simulator &amp; Seminar Resource</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">LEVEL UP</div>
+  <a href="#" onclick="showTab('overview',this)">Overview</a>
+  <a href="#" onclick="showTab('simulator',this)">CWA Simulator</a>
+  <a href="#" onclick="showTab('day1',this)">Day 1</a>
+  <a href="#" onclick="showTab('day2',this)">Day 2</a>
+  <a href="#" onclick="showTab('day3',this)">Day 3 — AI</a>
+  <a href="#" onclick="showTab('day4',this)">Day 4</a>
+  <a href="#" onclick="showTab('day5',this)">Day 5</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-tag">KNUST Break Seminar — Full Course Resource</p>
+  <h1>Level<br><em>Up.</em></h1>
+  <p>Five-day online seminar with live CWA simulation, AI study tools, and a complete facilitator guide. Everything in one page.</p>
+  <div class="hero-chips">
+    <span class="chip g">5 Days Online</span>
+    <span class="chip">~2 hrs / session</span>
+    <span class="chip">Live CWA Simulator</span>
+    <span class="chip">3 Semesters</span>
+  </div>
+</div>
+<div class="aud">
+  <span>For:</span>
+  <span class="aud-p">BSc Human Nutrition &amp; Dietetics — Yr 1</span>
+  <span class="aud-p">BSc Biochemistry — Yr 2</span>
+</div>
+
+<!-- TAB NAV -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="showTab('simulator',this)">📊 CWA Simulator</button>
+  <button class="tab-btn" onclick="showTab('day1',this)">Day 1 — CWA</button>
+  <button class="tab-btn" onclick="showTab('day2',this)">Day 2 — Trails</button>
+  <button class="tab-btn" onclick="showTab('day3',this)">Day 3 — AI</button>
+  <button class="tab-btn" onclick="showTab('day4',this)">Day 4 — Word</button>
+  <button class="tab-btn" onclick="showTab('day5',this)">Day 5 — Plan</button>
+</div>
+
+<!-- TAB CONTENT — injected by loader -->
+<div id="tab-root"></div>
+
+<!-- JS — load order matters: data → tabs → simulator → scenario → target -->
+<script src="js/data.js"></script>
+<script src="js/tabs.js"></script>
+<script src="js/simulator.js"></script>
+<script src="js/scenario.js"></script>
+<script src="js/target.js"></script>
+
+<script>
+// Fetch and inject all tab partials, then initialise the simulator
+(async function loadPartials() {
+  const partials = [
+    'tab-overview',
+    'tab-simulator',
+    'tab-day1',
+    'tab-day2',
+    'tab-day3',
+    'tab-day4',
+    'tab-day5',
+  ];
+  const root = document.getElementById('tab-root');
+  for (const name of partials) {
+    const res  = await fetch(`partials/${name}.html`);
+    const html = await res.text();
+    root.insertAdjacentHTML('beforeend', html);
+  }
+  // Initialise simulator after DOM is ready
+  rebuildAll();
+  switchYear(1, document.querySelector('.year-tab'));
+  calcScenario();
+})();
+</script>
+
+</body>
+</html>
