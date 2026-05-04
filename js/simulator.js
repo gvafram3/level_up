@@ -21,205 +21,271 @@ function classColor(c) {
   return '#ff5555';
 }
 
-// ── Input style helpers ────────────────────────────────────────────────────
-const iStyle = (color) =>
-  `background:transparent;border:none;color:${color};font-family:'Instrument Sans',sans-serif;font-size:12px;width:100%;padding:9px 10px;outline:none`;
-const monoStyle = (color) =>
-  `background:transparent;border:none;color:${color};font-family:'JetBrains Mono',monospace;font-size:12px;width:100%;padding:9px 10px;outline:none;text-align:center`;
+// ── Rebuild all sections ───────────────────────────────────────────────────
+function rebuildAll() {
+  const container = document.getElementById('sem-panels');
+  container.innerHTML = '';
 
-// ── Build rows for a regular semester (1 or 2) ─────────────────────────────
-function buildRows(year, sem) {
-  const panelId = `sem-panel-${year}-${sem}`;
-  let panel = document.getElementById(panelId);
-  if (!panel) {
-    panel = document.createElement('div');
-    panel.id = panelId;
-    panel.style.display = 'none';
-    document.getElementById('sem-panels').appendChild(panel);
+  for (let y = 1; y <= 4; y++) {
+    const block = document.createElement('div');
+    block.className = 'sim-year-block';
+    block.id = `section-y${y}`;
+
+    let html = `<div class="sim-year-heading">
+      <span class="sim-year-num">Year ${y}</span>
+      <span class="sim-year-line"></span>
+    </div>`;
+
+    html += buildSemSection(y, 1);
+    html += buildSemSection(y, 2);
+
+    const trails = getYearTrails(y);
+    if (trails.length > 0) html += buildResitSection(y, trails);
+
+    block.innerHTML = html;
+    container.appendChild(block);
   }
 
+  updateNavButtons();
+  recalc();
+}
+
+// ── Regular semester section ───────────────────────────────────────────────
+function buildSemSection(year, sem) {
   const courses = semData[year][sem];
-  let totCr = 0, totWP = 0, trails = 0;
-  courses.forEach(c => { totCr += c.cr; totWP += +c.score * c.cr; if (+c.score < 40) trails++; });
-  const semWA = totCr > 0 ? totWP / totCr : 0;
+
+  // Stats
+  let crReg = 0, crObt = 0, crCalc = 0, totWP = 0, trailList = [];
+  courses.forEach(c => {
+    crReg   += c.cr;
+    crCalc  += c.cr;
+    totWP   += +c.score * c.cr;
+    if (+c.score >= 40) crObt += c.cr;
+    else trailList.push(c.code + '(F)');
+  });
+  const semWA = crCalc > 0 ? totWP / crCalc : 0;
   const cum   = getCumulativeUpTo(year, sem);
 
-  panel.innerHTML = `
-    <table class="sim-courses">
-      <thead><tr>
-        <th style="width:32%">Course Name</th>
-        <th style="width:10%">Code</th>
-        <th style="width:8%">Credits</th>
-        <th style="width:11%">Score (/100)</th>
-        <th style="width:7%">Grade</th>
-        <th style="width:13%">Weighted Score</th>
-        <th style="width:9%">Status</th>
-        <th style="width:4%"></th>
-      </tr></thead>
-      <tbody>${courses.map((c, i) => regularRow(year, sem, c, i)).join('')}</tbody>
-      <tfoot>${semFooter(totCr, totWP, semWA, cum)}</tfoot>
-    </table>
-    <button class="add-course-btn" onclick="addRow(${year},${sem})">+ Add Course</button>
-  `;
+  const rows = courses.map((c, i) => regularRow(year, sem, c, i)).join('');
+  const summary = semSummary(crReg, crObt, crCalc, totWP, semWA, cum, trailList);
+
+  return `
+    <div class="sim-sem-section" id="section-y${year}-s${sem}">
+      <div class="sim-sem-heading">
+        <span class="sim-sem-label">Semester ${sem}</span>
+        ${trailList.length > 0 ? `<span class="sim-trail-badge">${trailList.length} Trail${trailList.length > 1 ? 's' : ''}</span>` : '<span class="sim-clear-badge">All Clear</span>'}
+      </div>
+      <div class="sim-table-wrap">
+        <table class="sim-courses">
+          <thead>
+            <tr>
+              <th class="col-code">Course Code</th>
+              <th class="col-name">Course Name</th>
+              <th class="col-cr">Credits</th>
+              <th class="col-score">Score</th>
+              <th class="col-grade">Grade</th>
+              <th class="col-del"></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${summary}
+      <button class="add-course-btn" onclick="addRow(${year},${sem})">+ Add Course</button>
+    </div>`;
 }
 
 function regularRow(year, sem, c, i) {
   const isTrail = +c.score < 40;
   const grade   = scoreToGrade(+c.score);
-  const wp      = +c.score * c.cr;
   return `<tr class="${isTrail ? 'trail-row' : ''}">
-    <td><input value="${c.name}" onchange="semData[${year}][${sem}][${i}].name=this.value"
-      style="${iStyle('rgba(255,255,255,.85)')}"></td>
-    <td><input value="${c.code}" onchange="semData[${year}][${sem}][${i}].code=this.value"
-      style="${iStyle('rgba(255,255,255,.5)')}"></td>
-    <td><input type="number" value="${c.cr}" min="1" max="6" step="1"
-      onchange="semData[${year}][${sem}][${i}].cr=+this.value;rebuildAll()"
-      style="${monoStyle('rgba(255,255,255,.85)')}"></td>
-    <td><input type="number" value="${c.score}" min="0" max="100" step="1"
-      onchange="semData[${year}][${sem}][${i}].score=+this.value;rebuildAll()"
-      style="${monoStyle(isTrail ? '#ff9966' : 'rgba(255,255,255,.85)')}"></td>
-    <td class="grade-cell" style="color:${isTrail ? '#ff9966' : 'var(--gold)'}">${grade}</td>
-    <td class="wp-cell">${wp.toFixed(1)}</td>
-    <td class="status-cell ${isTrail ? 'status-trail' : 'status-clear'}">${isTrail ? 'TRAIL' : 'Clear'}</td>
-    <td><button class="del-btn" onclick="semData[${year}][${sem}].splice(${i},1);rebuildAll()">✕</button></td>
+    <td class="col-code">
+      <input value="${c.code}" onchange="semData[${year}][${sem}][${i}].code=this.value"
+        class="sim-input sim-input-code${isTrail ? ' trail-text' : ''}">
+    </td>
+    <td class="col-name">
+      <input value="${c.name}" onchange="semData[${year}][${sem}][${i}].name=this.value"
+        class="sim-input sim-input-name${isTrail ? ' trail-text' : ''}">
+    </td>
+    <td class="col-cr">
+      <input type="number" value="${c.cr}" min="1" max="6" step="1"
+        onchange="semData[${year}][${sem}][${i}].cr=+this.value;rebuildAll()"
+        class="sim-input sim-input-num">
+    </td>
+    <td class="col-score">
+      <input type="number" value="${c.score}" min="0" max="100" step="1"
+        onchange="semData[${year}][${sem}][${i}].score=+this.value;rebuildAll()"
+        class="sim-input sim-input-num${isTrail ? ' trail-score' : ''}">
+    </td>
+    <td class="col-grade">
+      <span class="sim-grade${isTrail ? ' grade-f' : ''}">${grade}</span>
+    </td>
+    <td class="col-del">
+      <button class="del-btn" onclick="semData[${year}][${sem}].splice(${i},1);rebuildAll()">✕</button>
+    </td>
   </tr>`;
 }
 
-// ── Build rows for resit semester (sem 3) ──────────────────────────────────
-function buildResitRows(year) {
-  const panelId = `sem-panel-${year}-3`;
-  let panel = document.getElementById(panelId);
-  if (!panel) {
-    panel = document.createElement('div');
-    panel.id = panelId;
-    panel.style.display = 'none';
-    document.getElementById('sem-panels').appendChild(panel);
-  }
-
-  const trails = getYearTrails(year);
-  if (trails.length === 0) {
-    panel.innerHTML = `<div style="padding:24px;color:rgba(255,255,255,.4);font-size:13px;text-align:center">
-      No trails in Year ${year} — Resit Semester not required.</div>`;
-    return;
-  }
-
-  // Sync semData[year][3] to match current trails (preserve existing resit scores)
+// ── Resit semester section ─────────────────────────────────────────────────
+function buildResitSection(year, trails) {
   const existing = {};
   (semData[year][3] || []).forEach(r => { existing[r.code] = r.score; });
   semData[year][3] = trails.map(t => ({
-    name:      t.course.name,
-    code:      t.course.code,
-    cr:        t.course.cr,
-    score:     existing[t.course.code] !== undefined ? existing[t.course.code] : '',
-    semOrigin: t.semOrigin,
-    origIdx:   t.idx,
+    name: t.course.name, code: t.course.code, cr: t.course.cr,
+    score: existing[t.course.code] !== undefined ? existing[t.course.code] : '',
+    semOrigin: t.semOrigin, origIdx: t.idx,
   }));
 
   const resitCourses = semData[year][3];
-  let totCr = 0, totWP = 0;
+  let crReg = 0, crObt = 0, crCalc = 0, totWP = 0, stillTrailing = [];
   resitCourses.forEach(c => {
-    if (c.score !== '' && +c.score >= 0) { totCr += c.cr; totWP += +c.score * c.cr; }
+    if (c.score !== '' && c.score !== null) {
+      crReg  += c.cr; crCalc += c.cr;
+      totWP  += +c.score * c.cr;
+      if (+c.score >= 40) crObt += c.cr;
+      else stillTrailing.push(c.code + '(F)');
+    }
   });
-  const semWA = totCr > 0 ? totWP / totCr : 0;
+  const semWA = crCalc > 0 ? totWP / crCalc : 0;
   const cum   = getCumulativeUpTo(year, 3);
 
-  panel.innerHTML = `
-    <div class="callout warn" style="margin-bottom:12px">
-      <span style="font-size:16px">⚠️</span>
-      <div><p>These courses are automatically pulled from trails in Semester 1 &amp; 2 of Year ${year}. Enter the resit score for each.</p></div>
-    </div>
-    <table class="sim-courses">
-      <thead><tr>
-        <th style="width:32%">Course Name</th>
-        <th style="width:10%">Code</th>
-        <th style="width:8%">Credits</th>
-        <th style="width:11%">Resit Score (/100)</th>
-        <th style="width:7%">Grade</th>
-        <th style="width:13%">Weighted Score</th>
-        <th style="width:9%">Origin</th>
-      </tr></thead>
-      <tbody>${resitCourses.map((c, i) => resitRow(year, c, i)).join('')}</tbody>
-      <tfoot>${semFooter(totCr, totWP, semWA, cum)}</tfoot>
-    </table>
-  `;
+  const rows = resitCourses.map((c, i) => resitRow(year, c, i)).join('');
+  const summary = semSummary(crReg, crObt, crCalc, totWP, semWA, cum, stillTrailing, true);
+
+  return `
+    <div class="sim-sem-section sim-resit-section" id="section-y${year}-resit">
+      <div class="sim-sem-heading resit-heading">
+        <span class="sim-sem-label">Resit Semester</span>
+        <span class="sim-resit-note">Trailed courses from Sem 1 &amp; 2 — enter resit score</span>
+      </div>
+      <div class="sim-table-wrap">
+        <table class="sim-courses">
+          <thead>
+            <tr>
+              <th class="col-code">Course Code</th>
+              <th class="col-name">Course Name</th>
+              <th class="col-cr">Credits</th>
+              <th class="col-score">Resit Score</th>
+              <th class="col-grade">Grade</th>
+              <th class="col-origin">Origin</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${summary}
+    </div>`;
 }
 
 function resitRow(year, c, i) {
   const hasScore = c.score !== '' && c.score !== null;
   const isPass   = hasScore && +c.score >= 40;
   const grade    = hasScore ? scoreToGrade(+c.score) : '—';
-  const wp       = hasScore ? (+c.score * c.cr).toFixed(1) : '—';
-  const scoreColor = !hasScore ? 'rgba(255,255,255,.4)' : isPass ? '#88ccff' : '#ff9966';
   return `<tr class="${hasScore && !isPass ? 'trail-row' : ''}">
-    <td style="padding:9px 10px;color:rgba(255,255,255,.7);font-size:12px">${c.name}</td>
-    <td style="padding:9px 10px;color:rgba(255,255,255,.4);font-family:'JetBrains Mono',monospace;font-size:11px">${c.code}</td>
-    <td style="padding:9px 10px;color:rgba(255,255,255,.5);font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center">${c.cr}</td>
-    <td><input type="number" value="${hasScore ? c.score : ''}" min="0" max="100" step="1" placeholder="—"
-      onchange="semData[${year}][3][${i}].score=this.value===''?'':+this.value;rebuildAll()"
-      style="${monoStyle(scoreColor)}"></td>
-    <td class="grade-cell" style="color:${!hasScore ? 'rgba(255,255,255,.3)' : isPass ? 'var(--gold)' : '#ff9966'}">${grade}</td>
-    <td class="wp-cell">${wp}</td>
-    <td style="padding:9px 10px;font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.08em">Sem ${c.semOrigin}</td>
+    <td class="col-code">
+      <span class="sim-static-code">${c.code}</span>
+    </td>
+    <td class="col-name">
+      <span class="sim-static-name">${c.name}</span>
+    </td>
+    <td class="col-cr">
+      <span class="sim-static-num">${c.cr}</span>
+    </td>
+    <td class="col-score">
+      <input type="number" value="${hasScore ? c.score : ''}" min="0" max="100" step="1" placeholder="—"
+        onchange="semData[${year}][3][${i}].score=this.value===''?'':+this.value;rebuildAll()"
+        class="sim-input sim-input-num${hasScore && !isPass ? ' trail-score' : hasScore ? ' resit-score' : ''}">
+    </td>
+    <td class="col-grade">
+      <span class="sim-grade${!hasScore ? ' grade-empty' : isPass ? '' : ' grade-f'}">${grade}</span>
+    </td>
+    <td class="col-origin">
+      <span class="sim-origin">Sem ${c.semOrigin}</span>
+    </td>
   </tr>`;
 }
 
-// ── Semester footer: totals + cumulative row ───────────────────────────────
-function semFooter(totCr, totWP, semWA, cum) {
+// ── Summary block (matches reference image layout) ─────────────────────────
+function semSummary(crReg, crObt, crCalc, totWP, semWA, cum, trailList, isResit = false) {
+  const trailHTML = trailList.length > 0
+    ? trailList.map(t => `<span class="trail-code-tag">${t}</span>`).join('')
+    : '<span class="no-trail-tag">None</span>';
+
+  const waColor   = semWA > 0 ? classColor(semWA) : 'rgba(255,255,255,.4)';
+  const cumColor  = cum.cwa > 0 ? classColor(cum.cwa) : 'rgba(255,255,255,.4)';
+
   return `
-    <tr style="background:#1a1a1a;border-top:2px solid #333">
-      <td colspan="2" style="padding:8px 10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4)">Semester Totals</td>
-      <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);text-align:center;font-weight:600">${totCr}</td>
-      <td colspan="2" style="padding:8px 10px;font-size:10px;color:rgba(255,255,255,.35)">cr hrs</td>
-      <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);font-weight:600">${totWP.toFixed(1)}</td>
-      <td colspan="2" style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:13px;color:${classColor(semWA)};font-weight:700">SWA: ${totCr > 0 ? semWA.toFixed(1) + '%' : '—'}</td>
-    </tr>
-    <tr style="background:#111;border-top:1px solid #222">
-      <td colspan="2" style="padding:8px 10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)">Cumulative (all sems)</td>
-      <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.6);text-align:center">${cum.totCr}</td>
-      <td colspan="2" style="padding:8px 10px;font-size:10px;color:rgba(255,255,255,.3)">cr hrs</td>
-      <td style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.6)">${cum.totWP.toFixed(1)}</td>
-      <td colspan="2" style="padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:13px;color:${classColor(cum.cwa)};font-weight:700">CWA: ${cum.totCr > 0 ? cum.cwa.toFixed(1) + '%' : '—'}</td>
-    </tr>`;
+    <div class="sem-summary">
+      <div class="sem-summary-left">
+        <div class="summary-trail-label">Courses Trailing:</div>
+        <div class="summary-trail-list">${trailHTML}</div>
+      </div>
+      <div class="sem-summary-right">
+        <table class="summary-stats-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Semester</th>
+              <th>Cumulative</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="stat-label">Credits Registered</td>
+              <td class="stat-val">${crReg}</td>
+              <td class="stat-val">${cum.totCr}</td>
+            </tr>
+            <tr>
+              <td class="stat-label">Credits Obtained</td>
+              <td class="stat-val">${crObt}</td>
+              <td class="stat-val cum-dim">—</td>
+            </tr>
+            <tr>
+              <td class="stat-label">Credits for Calc.</td>
+              <td class="stat-val">${crCalc}</td>
+              <td class="stat-val">${cum.totCr}</td>
+            </tr>
+            <tr>
+              <td class="stat-label">Weighted Marks</td>
+              <td class="stat-val">${totWP.toFixed(0)}</td>
+              <td class="stat-val">${cum.totWP.toFixed(0)}</td>
+            </tr>
+            <tr class="stat-row-wa">
+              <td class="stat-label stat-label-wa">Weighted Average</td>
+              <td class="stat-val stat-val-wa" style="color:${waColor}">${crCalc > 0 ? semWA.toFixed(2) + '%' : '—'}</td>
+              <td class="stat-val stat-val-wa" style="color:${cumColor}">${cum.totCr > 0 ? cum.cwa.toFixed(2) + '%' : '—'}</td>
+            </tr>
+            <tr>
+              <td class="stat-label">Classification</td>
+              <td class="stat-val stat-class" colspan="2" style="color:${cumColor}">${cum.totCr > 0 ? classify(cum.cwa) : '—'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
-// ── Cumulative calculation up to (year, sem) ───────────────────────────────
-// Walk order: Y1S1 → Y1S2 → Y1S3 → Y2S1 → Y2S2 → Y2S3 → ...
-// The resit semester is ADDITIVE — the original F score stays in full,
-// and the resit adds its own credits + weighted scores on top.
-// e.g. Trail: 3cr × 25 = 75 stays. Resit: 3cr × 50 = 150 added on top.
-// CWA = (75 + 150 + all other WP) / (3 + 3 + all other cr)
+// ── Cumulative calculation ─────────────────────────────────────────────────
 function getCumulativeUpTo(targetYear, targetSem) {
   let totCr = 0, totWP = 0;
-
   for (let y = 1; y <= 4; y++) {
     for (let s = 1; s <= 3; s++) {
       if (y === targetYear && s > targetSem) break;
       if (y > targetYear) break;
-
       const courses = semData[y][s] || [];
-
       if (s === 3) {
-        // Resit semester: each entered resit score adds its own cr + WP
         courses.forEach(c => {
-          if (c.score !== '' && c.score !== null) {
-            totCr += c.cr;
-            totWP += +c.score * c.cr;
-          }
+          if (c.score !== '' && c.score !== null) { totCr += c.cr; totWP += +c.score * c.cr; }
         });
       } else {
-        // Regular semester: every course contributes its original score as-is
-        courses.forEach(c => {
-          totCr += c.cr;
-          totWP += +c.score * c.cr;
-        });
+        courses.forEach(c => { totCr += c.cr; totWP += +c.score * c.cr; });
       }
     }
   }
-
   return { totCr, totWP, cwa: totCr > 0 ? totWP / totCr : 0 };
 }
 
-// ── Per-semester stats (for dashboard) ────────────────────────────────────
+// ── Per-semester stats (for dashboard cards) ───────────────────────────────
 function getSemStats(year, sem) {
   const courses = semData[year][sem] || [];
   let totCr = 0, totWP = 0, trails = 0;
@@ -239,33 +305,41 @@ function getSemStats(year, sem) {
   return { totCr, totWP, trails, semWA: totCr > 0 ? totWP / totCr : 0 };
 }
 
-// ── Add a new course row ───────────────────────────────────────────────────
 function addRow(year, sem) {
   semData[year][sem].push({ name: 'New Course', code: '', cr: 3, score: 65 });
   rebuildAll();
 }
 
-// ── Rebuild all panels and recalc ─────────────────────────────────────────
-function rebuildAll() {
+// ── Nav buttons ────────────────────────────────────────────────────────────
+function updateNavButtons() {
+  const nav = document.getElementById('sim-nav-links');
+  if (!nav) return;
+  nav.innerHTML = '';
   for (let y = 1; y <= 4; y++) {
-    buildRows(y, 1);
-    buildRows(y, 2);
-    buildResitRows(y);
+    const yTrails = getYearTrails(y);
+    const group = document.createElement('div');
+    group.className = 'sim-nav-group';
+    let html = `<button class="sim-nav-year-btn" onclick="scrollToSection(${y},1)">Year ${y}</button>
+      <div class="sim-nav-sems">
+        <button class="sim-nav-sem-btn" onclick="scrollToSection(${y},1)">S1</button>
+        <button class="sim-nav-sem-btn" onclick="scrollToSection(${y},2)">S2</button>`;
+    if (yTrails.length > 0) {
+      html += `<button class="sim-nav-sem-btn sim-nav-resit" onclick="scrollToSection(${y},3)">Resit</button>`;
+    }
+    html += `</div>`;
+    group.innerHTML = html;
+    nav.appendChild(group);
   }
-  renderSemTabs();
-  renderSemPanel();
-  recalc();
 }
 
-// ── Main recalc: update dashboard + bar chart ─────────────────────────────
+// ── Main recalc ────────────────────────────────────────────────────────────
 function recalc() {
-  const stats  = getSemStats(activeYear, activeSem);
-  const cum    = getCumulativeUpTo(activeYear, activeSem);
+  const stats = getSemStats(activeYear, activeSem);
+  const cum   = getCumulativeUpTo(activeYear, activeSem);
 
-  // Dashboard
-  document.getElementById('sem-cwa').textContent   = stats.semWA.toFixed(1) + '%';
-  document.getElementById('sem-class').textContent  = classify(stats.semWA);
-  document.getElementById('sem-class').style.color  = classColor(stats.semWA);
+  document.getElementById('sem-cwa').textContent  = stats.semWA.toFixed(1) + '%';
+  document.getElementById('sem-class').textContent = classify(stats.semWA);
+  document.getElementById('sem-class').style.color = classColor(stats.semWA);
 
   const cvaEl = document.getElementById('cum-cwa');
   cvaEl.textContent = cum.cwa.toFixed(1) + '%';
@@ -277,41 +351,32 @@ function recalc() {
   document.getElementById('trail-msg').textContent   = stats.trails > 0 ? 'Resit semester unlocked' : 'No trails this semester';
   document.querySelector('.cwa-card.trail-card .cwa-val').style.color = stats.trails > 0 ? '#ff6b6b' : '#6bff9e';
 
-  // Bar chart — one bar per semester that has data
   buildBarChart();
-
   calcTarget();
   calcScenario();
 }
 
-// ── Bar chart: all semesters with data ────────────────────────────────────
+// ── Bar chart ──────────────────────────────────────────────────────────────
 function buildBarChart() {
   const timeline = document.getElementById('cum-timeline');
   timeline.innerHTML = '';
-
-  const order = [];
   for (let y = 1; y <= 4; y++) {
     for (let s = 1; s <= 3; s++) {
       const courses = semData[y][s] || [];
-      const hasData = s < 3
-        ? courses.length > 0
-        : courses.some(c => c.score !== '' && c.score !== null);
+      const hasData = s < 3 ? courses.length > 0 : courses.some(c => c.score !== '' && c.score !== null);
       if (!hasData) continue;
       const cum = getCumulativeUpTo(y, s);
       if (cum.totCr === 0) continue;
-      order.push({ y, s, cwa: cum.cwa });
+      const isActive = y === activeYear && s === activeSem;
+      const h = Math.max(4, Math.round((cum.cwa / 100) * 80));
+      const label = s === 3 ? `Y${y} Resit` : `Y${y} S${s}`;
+      const bar = document.createElement('div');
+      bar.className = 'cum-bar' + (isActive ? ' active' : '');
+      bar.style.cssText = `height:${h}px;background:${isActive ? classColor(cum.cwa) : 'rgba(200,148,26,0.25)'};cursor:pointer`;
+      bar.title = `${label}: CWA ${cum.cwa.toFixed(2)}%`;
+      bar.onclick = () => scrollToSection(y, s);
+      bar.innerHTML = `<span class="cum-bar-label">${label}</span><span class="cum-bar-val">${cum.cwa.toFixed(1)}%</span>`;
+      timeline.appendChild(bar);
     }
   }
-
-  order.forEach(({ y, s, cwa }) => {
-    const isActive = y === activeYear && s === activeSem;
-    const h = Math.max(4, Math.round((cwa / 100) * 80));
-    const label = s === 3 ? `Y${y} Resit` : `Y${y} S${s}`;
-    const bar = document.createElement('div');
-    bar.className = 'cum-bar' + (isActive ? ' active' : '');
-    bar.style.height = h + 'px';
-    bar.style.background = isActive ? classColor(cwa) : 'rgba(200,148,26,0.3)';
-    bar.innerHTML = `<span class="cum-bar-label">${label}</span><span class="cum-bar-val">${cwa.toFixed(1)}%</span>`;
-    timeline.appendChild(bar);
-  });
 }

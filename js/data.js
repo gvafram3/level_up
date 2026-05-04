@@ -3,71 +3,80 @@
 const semData = {
   1: {
     1: [
-      { name: 'Intro to Basic Computing', code: 'DCIT 111', cr: 3, score: 65 },
-      { name: 'General Biology I',        code: 'BIOL 111', cr: 3, score: 78 },
-      { name: 'General Chemistry I',      code: 'CHEM 111', cr: 3, score: 63 },
-      { name: 'Calculus I',               code: 'MATH 151', cr: 3, score: 54 },
-      { name: 'Principles of Nutrition',  code: 'NUTR 111', cr: 2, score: 82 },
-      { name: 'Communication Skills I',   code: 'LANG 111', cr: 2, score: 66 },
-      { name: 'Applied Physics',          code: 'PHYS 151', cr: 2, score: 45 },
-      { name: 'Food Science Basics',      code: 'NUTR 113', cr: 2, score: 32 },
-    ],
+      { name: 'Intro to Basic Computing',  code: 'DCIT 111', cr: 3, score: 67 },
+      { name: 'General Biology I',         code: 'BIOL 111', cr: 3, score: 74 },
+      { name: 'General Chemistry I',       code: 'CHEM 111', cr: 3, score: 58 },
+      { name: 'Calculus I',                code: 'MATH 151', cr: 3, score: 49 },
+      { name: 'Principles of Nutrition',   code: 'NUTR 111', cr: 3, score: 81 },
+      { name: 'Communication Skills I',    code: 'LANG 111', cr: 2, score: 70 },
+      { name: 'Food Science Basics',       code: 'NUTR 113', cr: 2, score: 35 },
+    ],                                     // total: 19 cr
     2: [
-      { name: 'Intro to Biochemistry',    code: 'BIOC 211', cr: 3, score: 65 },
-      { name: 'Human Physiology',         code: 'NUTR 211', cr: 3, score: 74 },
-      { name: 'Organic Chemistry',        code: 'CHEM 211', cr: 3, score: 52 },
-      { name: 'Biostatistics',            code: 'STAT 211', cr: 2, score: 61 },
-      { name: 'Nutrition Assessment',     code: 'NUTR 213', cr: 2, score: 77 },
-      { name: 'Research Methods',         code: 'NUTR 215', cr: 2, score: 53 },
-      { name: 'Food Microbiology',        code: 'NUTR 217', cr: 2, score: 44 },
-    ],
-    3: [] // auto-populated from trails in sem 1 & 2
+      { name: 'Intro to Biochemistry',     code: 'BIOC 121', cr: 3, score: 62 },
+      { name: 'Human Anatomy',             code: 'ANAT 121', cr: 3, score: 55 },
+      { name: 'Organic Chemistry I',       code: 'CHEM 121', cr: 3, score: 48 },
+      { name: 'Biostatistics I',           code: 'STAT 121', cr: 3, score: 71 },
+      { name: 'Nutrition & Health',        code: 'NUTR 121', cr: 3, score: 77 },
+      { name: 'Communication Skills II',   code: 'LANG 121', cr: 2, score: 66 },
+      { name: 'Applied Physics',           code: 'PHYS 121', cr: 2, score: 43 },
+    ],                                     // total: 19 cr
+    3: []
   },
   2: {
     1: [
-      { name: 'Metabolism I',             code: 'BIOC 311', cr: 3, score: 80 },
-      { name: 'Clinical Nutrition',       code: 'NUTR 311', cr: 3, score: 68 },
-      { name: 'Community Nutrition',      code: 'NUTR 313', cr: 2, score: 75 },
-      { name: 'Food Chemistry',           code: 'CHEM 311', cr: 3, score: 64 },
-      { name: 'Dietetics Practice',       code: 'NUTR 315', cr: 2, score: 55 },
-      { name: 'Epidemiology',             code: 'EPID 311', cr: 2, score: 62 },
-    ],
+      { name: 'Human Physiology I',        code: 'PHSL 211', cr: 3, score: 73 },
+      { name: 'Biochemistry I',            code: 'BIOC 211', cr: 3, score: 60 },
+      { name: 'Organic Chemistry II',      code: 'CHEM 211', cr: 3, score: 54 },
+      { name: 'Nutrition Assessment',      code: 'NUTR 211', cr: 3, score: 79 },
+      { name: 'Food Microbiology',         code: 'MBIO 211', cr: 3, score: 38 },
+      { name: 'Research Methods I',        code: 'RESM 211', cr: 2, score: 65 },
+      { name: 'Community Nutrition I',     code: 'NUTR 213', cr: 2, score: 58 },
+    ],                                     // total: 19 cr
     2: [
-      { name: 'Public Health Nutrition',  code: 'NUTR 317', cr: 2, score: 71 },
-      { name: 'Nutritional Biochemistry', code: 'BIOC 321', cr: 3, score: 58 },
-      { name: 'Food Policy',              code: 'NUTR 319', cr: 2, score: 66 },
-      { name: 'Microbiology II',          code: 'BIOL 321', cr: 3, score: 35 },
-      { name: 'Statistics II',            code: 'STAT 321', cr: 2, score: 60 },
-    ],
+      { name: 'Human Physiology II',       code: 'PHSL 221', cr: 3, score: 68 },
+      { name: 'Biochemistry II',           code: 'BIOC 221', cr: 3, score: 57 },
+      { name: 'Nutritional Biochemistry',  code: 'NUTR 221', cr: 3, score: 72 },
+      { name: 'Epidemiology',              code: 'EPID 221', cr: 3, score: 64 },
+      { name: 'Food Chemistry',            code: 'CHEM 221', cr: 3, score: 50 },
+      { name: 'Biostatistics II',          code: 'STAT 221', cr: 3, score: 76 },
+    ],                                     // total: 18 cr
     3: []
   },
   3: {
     1: [
-      { name: 'Advanced Nutrition',       code: 'NUTR 411', cr: 3, score: 72 },
-      { name: 'Molecular Biology',        code: 'BIOC 411', cr: 3, score: 65 },
-      { name: 'Research Design',          code: 'NUTR 413', cr: 2, score: 58 },
-      { name: 'Clinical Dietetics',       code: 'NUTR 415', cr: 3, score: 70 },
-      { name: 'Pharmacology Basics',      code: 'PHAR 311', cr: 2, score: 55 },
-    ],
+      { name: 'Clinical Nutrition I',      code: 'NUTR 311', cr: 3, score: 75 },
+      { name: 'Metabolism & Energetics',   code: 'BIOC 311', cr: 3, score: 63 },
+      { name: 'Public Health Nutrition',   code: 'NUTR 313', cr: 3, score: 69 },
+      { name: 'Food Policy & Law',         code: 'NUTR 315', cr: 2, score: 82 },
+      { name: 'Pharmacology Basics',       code: 'PHAR 311', cr: 2, score: 56 },
+      { name: 'Research Methods II',       code: 'RESM 311', cr: 3, score: 71 },
+      { name: 'Molecular Biology',         code: 'BIOC 313', cr: 3, score: 44 },
+    ],                                     // total: 19 cr
     2: [
-      { name: 'Community Health',         code: 'PUHL 411', cr: 2, score: 68 },
-      { name: 'Food Safety',              code: 'NUTR 417', cr: 2, score: 74 },
-      { name: 'Biostatistics II',         code: 'STAT 411', cr: 3, score: 62 },
-      { name: 'Nutrition Counselling',    code: 'NUTR 419', cr: 2, score: 77 },
-    ],
+      { name: 'Clinical Nutrition II',     code: 'NUTR 321', cr: 3, score: 78 },
+      { name: 'Dietetics Practice I',      code: 'NUTR 323', cr: 3, score: 66 },
+      { name: 'Community Health',          code: 'PUHL 321', cr: 3, score: 73 },
+      { name: 'Food Safety & Quality',     code: 'NUTR 325', cr: 3, score: 61 },
+      { name: 'Nutrition Counselling',     code: 'NUTR 327', cr: 3, score: 85 },
+      { name: 'Health Economics',          code: 'ECON 321', cr: 3, score: 52 },
+    ],                                     // total: 18 cr
     3: []
   },
   4: {
     1: [
-      { name: 'Dissertation I',           code: 'NUTR 511', cr: 6, score: 75 },
-      { name: 'Advanced Biochemistry',    code: 'BIOC 511', cr: 3, score: 68 },
-      { name: 'Health Economics',         code: 'ECON 411', cr: 2, score: 60 },
-    ],
+      { name: 'Dissertation I',            code: 'NUTR 411', cr: 6, score: 74 },
+      { name: 'Advanced Clinical Nutr.',   code: 'NUTR 413', cr: 3, score: 68 },
+      { name: 'Global Nutrition',          code: 'NUTR 415', cr: 3, score: 77 },
+      { name: 'Advanced Biochemistry',     code: 'BIOC 411', cr: 3, score: 62 },
+      { name: 'Dietetics Practice II',     code: 'NUTR 417', cr: 3, score: 71 },
+    ],                                     // total: 18 cr
     2: [
-      { name: 'Dissertation II',          code: 'NUTR 521', cr: 6, score: 78 },
-      { name: 'Professional Practice',    code: 'NUTR 523', cr: 2, score: 72 },
-      { name: 'Global Nutrition',         code: 'NUTR 525', cr: 2, score: 65 },
-    ],
+      { name: 'Dissertation II',           code: 'NUTR 421', cr: 6, score: 80 },
+      { name: 'Professional Practice',     code: 'NUTR 423', cr: 3, score: 73 },
+      { name: 'Nutrition & Disease',       code: 'NUTR 425', cr: 3, score: 67 },
+      { name: 'Food Systems',              code: 'NUTR 427', cr: 3, score: 59 },
+      { name: 'Seminar & Presentation',    code: 'NUTR 429', cr: 3, score: 76 },
+    ],                                     // total: 18 cr (+ 2 from dissertation = 20 total... wait: 6+3+3+3+3=18 ✓)
     3: []
   }
 };
