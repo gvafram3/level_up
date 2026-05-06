@@ -3,27 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Level Up — KNUST CWA Simulator &amp; Seminar Resource</title>
+<title>Level Up Academy — KNUST Seminar Resource</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-brand">LEVEL UP</div>
-  <a href="#" onclick="showTab('overview',this)">Overview</a>
-  <a href="#" onclick="showTab('simulator',this)">CWA Simulator</a>
-  <a href="#" onclick="showTab('day1',this)">Day 1</a>
-  <a href="#" onclick="showTab('day2',this)">Day 2</a>
-  <a href="#" onclick="showTab('day3',this)">Day 3 — AI</a>
-  <a href="#" onclick="showTab('day4',this)">Day 4</a>
-  <a href="#" onclick="showTab('day5',this)">Day 5</a>
-</nav>
-
 <!-- HERO -->
 <div class="hero">
-  <p class="hero-tag">KNUST Break Seminar — Full Course Resource</p>
+  <p class="hero-tag">Level Up Academy — KNUST Seminar Resource</p>
   <h1>Level<br><em>Up.</em></h1>
   <p>Five-day online seminar with live CWA simulation, AI study tools, and a complete facilitator guide. Everything in one page.</p>
   <div class="hero-chips">
@@ -35,12 +23,12 @@
 </div>
 <div class="aud">
   <span>For:</span>
-  <span class="aud-p">BSc Human Nutrition &amp; Dietetics — Yr 1</span>
-  <span class="aud-p">BSc Biochemistry — Yr 2</span>
+  <span class="aud-p">All KNUST Undergraduate Students</span>
 </div>
 
 <!-- TAB NAV -->
 <div class="tab-nav">
+  <div class="nav-brand">LEVEL UP ACADEMY</div>
   <button class="tab-btn active" onclick="showTab('overview',this)">Overview</button>
   <button class="tab-btn" onclick="showTab('simulator',this)">📊 CWA Simulator</button>
   <button class="tab-btn" onclick="showTab('day1',this)">Day 1 — CWA</button>
@@ -53,15 +41,9 @@
 <!-- TAB CONTENT — injected by loader -->
 <div id="tab-root"></div>
 
-<!-- JS — load order matters: data → tabs → simulator → scenario → target -->
-<script src="js/data.js"></script>
 <script src="js/tabs.js"></script>
-<script src="js/simulator.js"></script>
-<script src="js/scenario.js"></script>
-<script src="js/target.js"></script>
 
 <script>
-// Fetch and inject all tab partials, then initialise the simulator
 (async function loadPartials() {
   const partials = [
     'tab-overview',
@@ -78,10 +60,6 @@
     const html = await res.text();
     root.insertAdjacentHTML('beforeend', html);
   }
-  // Initialise simulator after DOM is ready
-  rebuildAll();
-  switchYear(1, document.querySelector('.year-tab'));
-  calcScenario();
 })();
 </script>
 

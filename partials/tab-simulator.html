@@ -1,91 +1,32 @@
 <div id="tab-simulator" class="tab-pane">
   <div class="sec-tag">Interactive Tool</div>
   <h2 class="page-title">Live CWA Simulator</h2>
-  <p class="intro-p">Enter your courses, credit hours, and scores across four years. Trails in any year automatically unlock a Resit Semester for that year. The simulator calculates your cumulative CWA in real time.</p>
+  <p class="intro-p">Use the live simulator below to enter your courses, credit hours, and scores. It calculates your Semester Weighted Average and Cumulative Weighted Average in real time, flags trails, and shows the impact of resit scores across all your years.</p>
 
   <div class="callout info" style="margin-bottom:20px">
     <span style="font-size:16px">📌</span>
-    <div><p><strong>Score scale:</strong> A (70–100) | B (60–69) | C (50–59) | D (40–49) | F (&lt;40 — Trail). Enter your actual score out of 100. Grade is derived automatically. If you trail any course, a <strong>Resit Semester</strong> tab appears — trailed courses are pulled in automatically; just enter the resit score.</p></div>
+    <div><p><strong>How to use:</strong> Enter your actual score out of 100 for each course. The grade (A/B/C/D/F) is derived automatically. Any score below 40 is a trail — a Resit Semester will appear automatically for that year. Open in full screen for the best experience.</p></div>
   </div>
 
-  <div class="sim-wrap">
-    <div class="sim-header">
-      <div>
-        <div class="sim-title">Four-Year CWA Simulator</div>
-        <div class="sim-subtitle">Enter scores below — calculations update instantly</div>
-      </div>
-      <div id="sim-nav-links" class="sim-nav-bar"></div>
+  <div style="border:1px solid #333;border-radius:2px;overflow:hidden;background:#0a0a0f">
+    <div style="background:#111;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #222">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--white)">KNUST CWA Simulator</span>
+      <a href="https://my-cwa.vercel.app" target="_blank" class="cta-btn" style="font-size:11px;padding:6px 14px">
+        Open Full Screen
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+      </a>
     </div>
-
-    <div class="sim-body">
-      <!-- All semester panels injected here by JS -->
-      <div id="sem-panels"></div>
-
-      <!-- CWA Dashboard -->
-      <div class="cwa-dash" id="cwa-dash">
-        <div class="cwa-card"><div class="cwa-label">Semester WA</div><div class="cwa-val" id="sem-cwa">—</div><div class="cwa-class" id="sem-class">—</div></div>
-        <div class="cwa-card highlight"><div class="cwa-label">Cumulative CWA</div><div class="cwa-val" id="cum-cwa">—</div><div class="cwa-class" id="cum-class">—</div></div>
-        <div class="cwa-card trail-card"><div class="cwa-label">Trails This Sem</div><div class="cwa-val" id="trail-count">0</div><div class="cwa-class" id="trail-msg">—</div></div>
-      </div>
-
-      <!-- Cumulative CWA bar timeline -->
-      <div style="margin:20px 0 8px">
-        <div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:28px">Cumulative CWA Progression</div>
-        <div class="cum-timeline" id="cum-timeline"></div>
-      </div>
-    </div>
+    <iframe
+      src="https://my-cwa.vercel.app"
+      style="width:100%;height:85vh;border:none;display:block"
+      title="KNUST CWA Simulator"
+      allow="clipboard-write"
+      loading="lazy">
+    </iframe>
   </div>
 
-  <!-- Trail Scenario Panel -->
-  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 8px">Trail Scenario — How a Trail Affects Your CWA</h3>
-  <p class="intro-p" style="margin-bottom:16px">See exactly what happens to your CWA when you trail a course, and how different resit scores change the outcome.</p>
-  <div class="trail-scenario">
-    <h4>Trail CWA Impact Calculator</h4>
-    <div class="grid2" style="gap:12px;margin-bottom:16px">
-      <div>
-        <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);display:block;margin-bottom:6px">Your Current Cumulative CWA (%)</label>
-        <input type="number" id="sc-prev-cwa" value="62" step="0.1" min="0" max="100" oninput="calcScenario()"
-          style="background:rgba(255,255,255,.08);border:1px solid #333;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 14px;width:100%;outline:none">
-      </div>
-      <div>
-        <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);display:block;margin-bottom:6px">Current Total Credit Hours</label>
-        <input type="number" id="sc-prev-cr" value="18" step="1" min="1" oninput="calcScenario()"
-          style="background:rgba(255,255,255,.08);border:1px solid #333;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 14px;width:100%;outline:none">
-      </div>
-      <div>
-        <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);display:block;margin-bottom:6px">Trailed Course Credit Hours</label>
-        <input type="number" id="sc-cr" value="3" step="1" min="1" max="6" oninput="calcScenario()"
-          style="background:rgba(255,255,255,.08);border:1px solid #333;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 14px;width:100%;outline:none">
-      </div>
-      <div>
-        <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);display:block;margin-bottom:6px">Your Resit Score (0–100)</label>
-        <input type="number" id="sc-resit-score" value="55" step="1" min="0" max="100" oninput="calcScenario()"
-          style="background:rgba(255,255,255,.08);border:1px solid #333;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 14px;width:100%;outline:none">
-      </div>
-    </div>
-    <div class="trail-bars" id="trail-bars"></div>
-  </div>
-
-  <!-- Target Projection -->
-  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 8px">CWA Target Projection</h3>
-  <div class="card" style="background:var(--ink);border:1px solid #222;margin-bottom:16px">
-    <div class="grid2" style="gap:12px;margin-bottom:16px">
-      <div>
-        <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);display:block;margin-bottom:6px">Your Target CWA (%)</label>
-        <input type="number" id="tgt-cwa" value="65" step="0.1" min="0" max="100" oninput="calcTarget()"
-          style="background:rgba(255,255,255,.08);border:1px solid #333;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 14px;width:100%;outline:none">
-      </div>
-      <div>
-        <label style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);display:block;margin-bottom:6px">Next Semester Credit Hours</label>
-        <input type="number" id="tgt-cr" value="20" step="1" min="1" oninput="calcTarget()"
-          style="background:rgba(255,255,255,.08);border:1px solid #333;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 14px;width:100%;outline:none">
-      </div>
-    </div>
-    <div id="target-result" style="background:#0a0a0a;border:1px solid #333;padding:18px;text-align:center">
-      <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px">Average Score Needed Next Semester</div>
-      <div id="target-score" style="font-family:'JetBrains Mono',monospace;font-size:36px;color:var(--gold-l);font-weight:500">—</div>
-      <div id="target-msg" style="font-size:12px;color:rgba(255,255,255,.5);margin-top:8px">Enter data above</div>
-    </div>
-    <div id="proj-table-wrap" style="margin-top:14px"></div>
+  <div class="callout ok" style="margin-top:20px">
+    <span style="font-size:18px">💡</span>
+    <div><p>If the simulator does not load inside this page, click <strong>Open Full Screen</strong> above to use it directly at <a href="https://my-cwa.vercel.app" target="_blank" style="color:var(--gold)">my-cwa.vercel.app</a>. It works on phones and laptops.</p></div>
   </div>
 </div>

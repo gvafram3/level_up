@@ -35,7 +35,8 @@ nav a:hover,nav a.active{color:var(--gold);background:rgba(200,148,26,.08)}
 .aud-p{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:4px 16px;border-radius:2px;font-size:12px}
 
 /* ─── TABS ────────────────────────────────────────────────────────────────── */
-.tab-nav{background:var(--ink);display:flex;border-bottom:2px solid #222;overflow-x:auto}
+.tab-nav{background:var(--ink);display:flex;align-items:stretch;border-bottom:2px solid var(--gold);overflow-x:auto;position:sticky;top:0;z-index:200}
+.tab-nav .nav-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--gold);padding:0 20px;display:flex;align-items:center;border-right:1px solid #333;flex-shrink:0;letter-spacing:.05em;white-space:nowrap}
 .tab-btn{background:none;border:none;color:rgba(255,255,255,.45);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px 20px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:'Instrument Sans',sans-serif;font-weight:500;transition:all .15s}
 .tab-btn:hover{color:rgba(255,255,255,.8)}
 .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
